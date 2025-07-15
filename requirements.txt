@@ -1,0 +1,11 @@
+# Bat Broom - Windows Temporary Files Cleanup GUI
+# Requirements file for Python dependencies
+
+# Note: tkinter is included with Python standard library
+# No additional packages required for basic functionality
+
+# Optional: For creating executable
+# pyinstaller>=5.0.0
+
+# Optional: For enhanced GUI styling
+# ttkthemes>=3.2.0 
