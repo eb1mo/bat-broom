@@ -2,6 +2,13 @@
 
 A user-friendly Python GUI application for safely cleaning Windows temporary files and system cache.
 
+---
+## WARNING
+
+Please check the paths the software is cleaning. Know what you are doing. Select only paths you want to clean before starting the cleanup.
+
+---
+
 ## Features
 
 - **🎯 Selective Cleanup**: Choose exactly which temporary files to clean
@@ -11,28 +18,6 @@ A user-friendly Python GUI application for safely cleaning Windows temporary fil
 - **🔒 Safe Operations**: Built-in error handling and permission checks
 - **👑 Admin Detection**: Automatically detects and warns about administrator privileges
 - **🧵 Threaded Operations**: Non-blocking UI during cleanup operations
-
-## Screenshots
-
-```
-┌─────────────────────────────────────────────────────┐
-│                🧹 Bat Broom                         │
-│         Windows Temporary Files Cleanup Tool        │
-├─────────────────────┬───────────────────────────────┤
-│ Cleanup Sections    │ [Select All] [Deselect All]  │
-│                     │ [🧹 Start Cleanup]           │
-│ ☑ User Temporary    │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
-│   ☑ User Temp Dir   │                               │
-│   ☑ AppData Temp    │ Cleanup Log                   │
-│   ☐ Internet Cache  │ ┌─────────────────────────────┐ │
-│                     │ │[12:34:56] Starting cleanup │ │
-│ ☐ System Files     │ │[12:34:57] ✅ User Temp -   │ │
-│ ☐ Browser Cache    │ │          Cleaned (45 items)│ │
-│ ☐ Crash Dumps      │ │[12:34:58] ℹ️ Chrome Cache  │ │
-│                     │ │          - No files found  │ │
-│                     │ └─────────────────────────────┘ │
-└─────────────────────┴───────────────────────────────┘
-```
 
 ## Installation & Usage
 
