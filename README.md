@@ -46,7 +46,7 @@ A user-friendly Python GUI application for safely cleaning Windows temporary fil
 1. **Download the application:**
    ```bash
    # Clone or download the files
-   git clone <repository-url>
+   git clone https://github.com/eb1mo/bat-broom.git
    cd bat-broom
    ```
 

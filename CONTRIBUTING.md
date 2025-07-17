@@ -55,7 +55,7 @@ Before submitting:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/bat-broom.git
+   git clone https://github.com/eb1mo/bat-broom.git
    cd bat-broom
    ```
 

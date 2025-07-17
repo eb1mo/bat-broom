@@ -24,7 +24,7 @@ setup(
     description="A user-friendly Python GUI application for safely cleaning Windows temporary files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-username/bat-broom",
+    url="https://github.com/eb1mo/bat-broom",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -60,8 +60,8 @@ setup(
     zip_safe=False,
     keywords="windows, cleanup, temporary files, gui, tkinter, system maintenance",
     project_urls={
-        "Bug Reports": "https://github.com/your-username/bat-broom/issues",
-        "Source": "https://github.com/your-username/bat-broom",
-        "Documentation": "https://github.com/your-username/bat-broom#readme",
+        "Bug Reports": "https://github.com/eb1mo/bat-broom/issues",
+        "Source": "https://github.com/eb1mo/bat-broom",
+        "Documentation": "https://github.com/eb1mo/bat-broom#readme",
     },
 ) 
