@@ -15,12 +15,25 @@ from pathlib import Path
 import ctypes
 import sys
 
+# Add theme support for a more modern look
+try:
+    from ttkthemes import ThemedTk
+    HAS_THEMES = True
+except ImportError:
+    HAS_THEMES = False
+
 class BatBroomApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Bat Broom - Windows Temporary Files Cleanup")
-        self.root.geometry("800x600")
-        self.root.configure(bg='#f0f0f0')
+        self.root.geometry("900x650")  # Increased window size for better layout
+        
+        # Set theme if available
+        if HAS_THEMES and isinstance(root, ThemedTk):
+            root.set_theme("arc")  # Modern, clean theme
+        
+        # Configure styles for a more modern look
+        self.configure_styles()
         
         # Check admin privileges
         self.is_admin = self.check_admin()
@@ -37,6 +50,36 @@ class BatBroomApp:
         # Show admin warning if needed
         if not self.is_admin:
             self.show_admin_warning()
+    
+    def configure_styles(self):
+        """Configure custom styles for widgets"""
+        style = ttk.Style()
+        
+        # Configure button style
+        style.configure("Action.TButton", 
+                       font=('Arial', 10, 'bold'),
+                       padding=8)
+        
+        # Configure section header style
+        style.configure("Section.TCheckbutton", 
+                       font=('Arial', 10, 'bold'))
+        
+        # Configure path item style
+        style.configure("Path.TCheckbutton", 
+                       font=('Arial', 9))
+        
+        # Configure header style
+        style.configure("Header.TLabel", 
+                       font=('Arial', 16, 'bold'))
+        
+        # Configure subheader style
+        style.configure("Subheader.TLabel", 
+                       font=('Arial', 10))
+        
+        # Configure frame style
+        style.configure("Card.TFrame", 
+                       background="#f8f8f8",
+                       relief="raised")
     
     def check_admin(self):
         """Check if running with administrator privileges"""
@@ -94,32 +137,82 @@ class BatBroomApp:
     
     def create_gui(self):
         """Create the main GUI interface"""
-        # Main frame
-        main_frame = ttk.Frame(self.root, padding="10")
+        # Main frame with padding
+        main_frame = ttk.Frame(self.root, padding="15")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Configure grid weights
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(1, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(2, weight=1)
         
-        # Title
-        title_label = ttk.Label(main_frame, text="🧹 Bat Broom", font=('Arial', 16, 'bold'))
-        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 10))
+        # Header frame
+        header_frame = ttk.Frame(main_frame)
+        header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        header_frame.columnconfigure(0, weight=1)
+        
+        # Logo and title
+        title_label = ttk.Label(header_frame, text="🧹 Bat Broom", style="Header.TLabel")
+        title_label.grid(row=0, column=0, sticky=tk.W)
         
         # Subtitle
-        subtitle_label = ttk.Label(main_frame, text="Windows Temporary Files Cleanup Tool", font=('Arial', 10))
-        subtitle_label.grid(row=0, column=0, columnspan=2, pady=(25, 10))
+        subtitle_label = ttk.Label(header_frame, text="Windows Temporary Files Cleanup Tool", style="Subheader.TLabel")
+        subtitle_label.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
+        
+        # Control buttons frame - now at the top
+        button_frame = ttk.Frame(main_frame, padding=(0, 10))
+        button_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+        
+        # Select All / Deselect All buttons
+        select_all_btn = ttk.Button(
+            button_frame, 
+            text="Select All", 
+            command=self.select_all,
+            style="Action.TButton",
+            width=15
+        )
+        select_all_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        deselect_all_btn = ttk.Button(
+            button_frame, 
+            text="Deselect All", 
+            command=self.deselect_all,
+            style="Action.TButton",
+            width=15
+        )
+        deselect_all_btn.grid(row=0, column=1, padx=(0, 10))
+        
+        # Clean button
+        self.clean_btn = ttk.Button(
+            button_frame, 
+            text="🧹 Start Cleanup", 
+            command=self.start_cleanup,
+            style="Action.TButton",
+            width=20
+        )
+        self.clean_btn.grid(row=0, column=2, padx=(0, 10))
+        
+        # Progress bar
+        self.progress = ttk.Progressbar(button_frame, mode='indeterminate')
+        self.progress.grid(row=0, column=3, sticky=(tk.W, tk.E), padx=(10, 0))
+        button_frame.columnconfigure(3, weight=1)
+        
+        # Content frame - contains both sections and log
+        content_frame = ttk.Frame(main_frame)
+        content_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        content_frame.columnconfigure(0, weight=1)
+        content_frame.columnconfigure(1, weight=1)
+        content_frame.rowconfigure(0, weight=1)
         
         # Left panel - Cleanup sections
-        left_frame = ttk.LabelFrame(main_frame, text="Cleanup Sections", padding="10")
-        left_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 5))
+        left_frame = ttk.LabelFrame(content_frame, text="Cleanup Sections", padding="10")
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 8))
         left_frame.columnconfigure(0, weight=1)
         left_frame.rowconfigure(0, weight=1)
         
         # Scrollable frame for sections
-        canvas = tk.Canvas(left_frame, width=350)
+        canvas = tk.Canvas(left_frame)
         scrollbar = ttk.Scrollbar(left_frame, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         
@@ -131,41 +224,19 @@ class BatBroomApp:
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
+        # Make canvas expand with window
         canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         
         # Create sections
         self.create_sections(scrollable_frame)
         
-        # Right panel - Log and controls
-        right_frame = ttk.Frame(main_frame)
-        right_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(5, 0))
-        right_frame.columnconfigure(0, weight=1)
-        right_frame.rowconfigure(1, weight=1)
+        # Configure canvas to resize with window
+        left_frame.bind("<Configure>", lambda e: canvas.configure(width=e.width-30))
         
-        # Control buttons
-        button_frame = ttk.Frame(right_frame)
-        button_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        button_frame.columnconfigure(1, weight=1)
-        
-        # Select All / Deselect All buttons
-        select_all_btn = ttk.Button(button_frame, text="Select All", command=self.select_all)
-        select_all_btn.grid(row=0, column=0, padx=(0, 5))
-        
-        deselect_all_btn = ttk.Button(button_frame, text="Deselect All", command=self.deselect_all)
-        deselect_all_btn.grid(row=0, column=1, padx=(0, 5))
-        
-        # Clean button
-        self.clean_btn = ttk.Button(button_frame, text="🧹 Start Cleanup", command=self.start_cleanup, style="Accent.TButton")
-        self.clean_btn.grid(row=0, column=2, padx=(5, 0))
-        
-        # Progress bar
-        self.progress = ttk.Progressbar(right_frame, mode='indeterminate')
-        self.progress.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(35, 10))
-        
-        # Log area
-        log_frame = ttk.LabelFrame(right_frame, text="Cleanup Log", padding="5")
-        log_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Right panel - Log
+        log_frame = ttk.LabelFrame(content_frame, text="Cleanup Log", padding="10")
+        log_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(8, 0))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(0, weight=1)
         
@@ -176,37 +247,57 @@ class BatBroomApp:
         self.status_var = tk.StringVar()
         self.status_var.set("Ready")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
-        status_bar.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 0))
+        status_bar.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(15, 0))
         
         # Initial log message
         self.log_message("Bat Broom initialized successfully!")
         if not self.is_admin:
             self.log_message("⚠️ Warning: Not running as administrator. Some operations may fail.")
+        
+        # Create tooltips for hover info
+        self.create_tooltip(title_label, "Bat Broom - Windows Temporary Files Cleanup")
+        self.create_tooltip(self.clean_btn, "Start cleaning selected temporary files")
     
     def create_sections(self, parent):
         """Create collapsible sections with checkboxes"""
         row = 0
         for section_name, paths in self.cleanup_sections.items():
-            # Section frame
-            section_frame = ttk.LabelFrame(parent, text="", padding="5")
-            section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            # Section frame with card-like appearance
+            section_frame = ttk.Frame(parent, padding="8")
+            section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=5)
             section_frame.columnconfigure(0, weight=1)
             
             # Section checkbox and label
             section_var = tk.BooleanVar()
             self.section_vars[section_name] = section_var
             
+            # Create a frame to hold the checkbox and an expand/collapse button
+            header_frame = ttk.Frame(section_frame)
+            header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E))
+            header_frame.columnconfigure(1, weight=1)
+            
+            # Section checkbox - now only toggles the checkbox state
             section_cb = ttk.Checkbutton(
-                section_frame, 
+                header_frame, 
                 text=section_name, 
                 variable=section_var,
-                command=lambda sn=section_name: self.toggle_section(sn)
+                command=lambda sn=section_name: self.toggle_section(sn),
+                style="Section.TCheckbutton"
             )
             section_cb.grid(row=0, column=0, sticky=tk.W, pady=2)
             
+            # Add expand/collapse button
+            toggle_btn = ttk.Button(
+                header_frame,
+                text="▼",
+                width=2,
+                command=lambda sf=section_frame: self.toggle_section_visibility(sf)
+            )
+            toggle_btn.grid(row=0, column=1, sticky=tk.E, padx=(0, 5))
+            
             # Paths frame (initially hidden)
-            paths_frame = ttk.Frame(section_frame)
-            paths_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), padx=20)
+            paths_frame = ttk.Frame(section_frame, padding=(20, 5, 0, 5))
+            paths_frame.grid(row=1, column=0, sticky=(tk.W, tk.E))
             paths_frame.columnconfigure(0, weight=1)
             
             # Create path checkboxes
@@ -219,21 +310,40 @@ class BatBroomApp:
                     paths_frame,
                     text=description,
                     variable=path_var,
-                    command=lambda sn=section_name: self.update_section_state(sn)
+                    command=lambda sn=section_name: self.update_section_state(sn),
+                    style="Path.TCheckbutton"
                 )
                 path_cb.grid(row=i, column=0, sticky=tk.W, pady=1)
+                
+                # Add tooltip showing the actual path
+                expanded_path = self.expand_path(path)
+                tooltip_text = f"Path: {expanded_path}"
+                self.create_tooltip(path_cb, tooltip_text)
             
             # Initially hide paths
             paths_frame.grid_remove()
             
-            # Store reference to paths frame for toggling
+            # Store reference to paths frame and button for toggling
             section_frame.paths_frame = paths_frame
+            section_frame.toggle_btn = toggle_btn
             section_frame.is_expanded = False
             
-            # Bind click event to expand/collapse
-            section_cb.bind('<Button-1>', lambda e, sf=section_frame, sn=section_name: self.toggle_section_display(sf, sn))
-            
             row += 1
+    
+    def create_tooltip(self, widget, text):
+        """Create a tooltip for a widget"""
+        tooltip = ToolTip(widget, text)
+    
+    def toggle_section_visibility(self, section_frame):
+        """Toggle the visibility of section paths without changing checkbox state"""
+        if section_frame.is_expanded:
+            section_frame.paths_frame.grid_remove()
+            section_frame.toggle_btn.configure(text="▼")
+            section_frame.is_expanded = False
+        else:
+            section_frame.paths_frame.grid()
+            section_frame.toggle_btn.configure(text="▲")
+            section_frame.is_expanded = True
     
     def toggle_section_display(self, section_frame, section_name):
         """Toggle the display of section paths"""
@@ -440,9 +550,51 @@ class BatBroomApp:
                           "Temporary files cleanup has been completed!\n\n"
                           "Check the log for detailed results.")
 
+
+class ToolTip:
+    """
+    Create a tooltip for a given widget
+    """
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
+    
+    def on_enter(self, event=None):
+        """Show tooltip on mouse enter"""
+        x, y, _, _ = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 25
+        
+        # Creates a toplevel window
+        self.tooltip_window = tk.Toplevel(self.widget)
+        
+        # Make it stay on top
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+        
+        # Create tooltip content
+        label = ttk.Label(self.tooltip_window, text=self.text, 
+                         background="#ffffee", relief="solid", borderwidth=1,
+                         wraplength=300, justify="left", padding=(5, 3))
+        label.pack()
+    
+    def on_leave(self, event=None):
+        """Hide tooltip on mouse leave"""
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
+
 def main():
     """Main application entry point"""
-    root = tk.Tk()
+    # Use themed tk if available for a more modern look
+    if HAS_THEMES:
+        root = ThemedTk(theme="arc")
+    else:
+        root = tk.Tk()
     
     # Set application icon (if available)
     try:
